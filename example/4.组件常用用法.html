@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>React Exmpale</title>
+    <!-- React 核心库     -->
+    <script src="./bower_components/local_react/react.js"></script>
+    <!-- 提供dom操作 -->
+    <script src="./bower_components/local_react/react-dom.js"></script>
+    <!-- 将jsx语法转为javascript -->
+    <script src="./bower_components/local_react/browser.js"></script>
+    <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <style media="screen">
+      .box{width:300px;height: 300px;margin: 55px;  background: radial-gradient(circle at 100px 100px, #CCC, #000); position: absolute;border-radius: 150px;}
+      img{margin-top: 300px;}
+      .parent{width: 300px;height: 300px;background: red}
+      .children{width: 100px;height: 100px;background: yellow;z-index: 999;margin: 0 auto;}
+    </style>
+  </head>
+  <body>
+      <!-- react 渲染的模版内容会插入到这个dom节点中，作为一个容器 -->
+      <div id="example_container"></div>
+      <div id="example_es5"></div>
+      <div id="example_switch_color"></div>
+      <example_drag ></example_drag>
+      <div id="example_form"></div>
+      <example_event_bubbling></example_event_bubbling>
+      <div class="example_load_dlls"></div>
+
+  </body>
+
+    <!-- 在React中使用jsx跟JavaScript不兼容，在使用jsx的地方要设置type=babel -->
+    <!-- babel是一个转换编译器，ESC6转换成可以在浏览器中运行的代码 -->
+    <script type="text/babel">
+      /**
+       * Exapmle 1: 换一种 直接传入Json写法
+       *
+       * Facebook 已经声明 React.createClass 最终会被 ES6 class 取代，
+       * 过他们也说「我们不会废弃 React.createClass，直到我们找到目前 mixin 用例的替代方案，并且在语言中支持类属性初始化器」。
+       *
+       * React 组件构造方法: ES5 (createClass)  ES6 (class)
+       * 用 createClass 很简单：每一个成员函数都由 React 自动绑定。任何时候需要调用，直接使用 this.whateverFn 即可，
+       * 函数中的 this 变量在函数调用时会被正确设置
+       *
+       * ---> ES6 绑定
+       * 1. 使用 `.bind`: render() { return ( <input onChange={this.handleChange.bind(this)} value={this.state.text} /> ); }
+       * 2. 使用胖箭头函数:  render() { return ( <input onChange={() => this.handleChange()} value={this.state.text} /> ); }
+       *
+       * 以上任何一种方法都行的通，但都不如前文的方法有效率。因为每次render 方法被调用的时候（这个调用会相当频繁）就会有一个新的函数被创建。
+       * 相比于在构造函数中做仅仅一次函数绑定，这个方法会慢一些。
+       * 还有一个最终选项是将函数自身替换为胖箭头函数，像这样：
+       *
+       *  // 需要在别处绑定
+       *  handleChange(event) {
+       *    this.setState({
+       *        text: event.target.value
+       *      });
+       *  }
+       * // ES7 做法
+       * // 不需要另外绑定
+       * handleChange = (event) => {
+       *     this.setState({
+       *         text: event.target.value
+       *     });
+       * }
+       */
+      var Title = React.createClass({
+        propTypes: { initialValue: React.PropTypes.string },
+        defaultProps: { initialValue: '' }, // 设置 initial state
+        getInitialState: function() {
+            return { text: this.props.initialValue || 'placeholder' };
+        },
+        /**
+         * [responseShow description]
+         * @method responseShow
+         * @param  {[type]}     event [description]
+         * @return {[type]}           [description]
+         */
+        handleClick: function(event){
+            console.log(event)
+        },
+        /**
+         * [render 视图渲染]
+         * @method render
+         * @return {[type]} [description]
+         */
+        render : function(){
+            return (
+              <div>
+                <input type="button" value="ES5 事件驱动" onClick={this.handleClick} />
+              </div>
+            );
+          }
+      });
+          ReactDOM.render(
+             <Title />,
+             document.getElementById('example_es5')
+          );
+
+     /**
+      * Exapmle 2:
+      *
+      * modify Color
+      */
+      class SwitchColor extends React.Component{
+        /**
+         * [constructor 初始化参数]
+         * @method constructor
+         * @return {[type]}    [description]
+         */
+        constructor(...ags){
+            super(...ags)
+            this.state = {
+              bgColor : '#CCC',
+              buttonText : '切换为红色'
+            }
+        }
+        /**
+         * [handerClick click]
+         * @method handerClick
+         * @param  {[type]}    event [description]
+         * @return {[type]}          [description]
+         */
+        handerClick(event){
+            this.setState({
+              bgColor : this.state.bgColor == 'red' ? '#CCC' : 'red',
+              buttonText : this.state.buttonText == '切换为灰色' ? '切换为红色' : '切换为灰色'
+            });
+            /**
+             * React 状态管理 组件化 兼容其他
+             */
+            var cSpan = this.refs['c_span'];
+                // 原生写法
+                cSpan.style.color = 'green';
+                // JQuery 写法
+                $(cSpan).css('font-size','66px');
+        }
+        /**
+         * [componentDidMount 创建完就执行下]
+         * @method componentDidMount
+         * @return {[type]}          [description]
+         */
+        componentDidMount(){
+          this.handerClick();
+        }
+
+        /**
+         * [render 渲染视图]
+         * @method render
+         * @return {[type]} [description]
+         */
+        render(){
+          return (
+            <div style={{backgroundColor:this.state.bgColor,width:300,height:300}}>
+              <input type="button" value={this.state.buttonText}  onClick={this.handerClick.bind(this)}/>
+              <span ref="c_span"> The child node </span>
+            </div>);
+        }
+      }
+      ReactDOM.render(
+         <SwitchColor />,
+         document.getElementById('example_switch_color')
+      );
+
+     /**
+      * Exapmle 3:
+      *
+      * 小球拖拽
+      */
+     class Drag extends React.Component{
+       /**
+        * [constructor description]
+        * @method constructor
+        * @param  {[type]}    ags [description]
+        * @return {[type]}        [description]
+        */
+       constructor(...ags){
+         super(...ags);
+         this.state={
+           x:0,
+           y:0
+         }
+       }
+       /**
+        * [handerMouseDown 鼠标拖拽句柄]
+        * @method handerMouseDown
+        * @param  {[type]}        event [react 的 event]
+        * @return {[type]}              [description]
+        */
+       handerMouseDown(event){
+          var currentX = event.pageX - this.state.x,
+              currentY = event.pageY - this.state.y,
+              _this    = this;
+
+          document.onmousemove = function(ev){
+                // 这里的ev才是原生的
+                _this.setState({
+                  x: ev.pageX - currentX,
+                  y: ev.pageY - currentY
+                })
+            };
+          document.onmouseup= function(ev){
+            document.onmousemove = null;
+            document.onmouseup = null;
+          };
+       }
+
+       /**
+        * [render description]
+        * @method render
+        * @return {[type]} [description]
+        */
+       render(){
+         return(
+            <div className='box'
+                 style={{left:this.state.x+'px',top:this.state.y+'px'}}
+                 onMouseDown={this.handerMouseDown.bind(this)}>
+            </div>
+         );
+       }
+     }
+     /**
+      * Jquery 方式立即调用函数
+      */
+     (function(){
+       ReactDOM.render(
+          <Drag />,
+          $('example_drag')[0]
+       );
+     })();
+
+     /**
+      * Exapmle 4:
+      *
+      * 表单
+      */
+     class TheForm extends React.Component{
+       /**
+        * [constructor 构造函数]
+        * @method constructor
+        * @param  {[type]}    ags [description]
+        * @return {[type]}        [description]
+        */
+       constructor(...ags){
+         super(...ags);
+       }
+       /**
+        * [render 渲染]
+        * @method render
+        * @return {[type]} [description]
+        */
+       render(){
+         /*
+          * 1. 这里用 value 的话将会出现一个只读的域
+          * 2. 同理直接使用checked 将会造成只读
+          */
+         return (
+            <div style={{marginTop:99}}>
+              <h1>React 表单</h1>
+              <form  method='GET'>
+                  <input type="text" name="user" defaultValue={this.props.user}/>
+                   是否记住密码：
+                  <input type="checkbox" name="rember" defaultChecked="true"/>
+                  <input type="submit"/>
+              </form>
+            </div>
+         );
+       }
+     }
+     (function(){
+       ReactDOM.render(
+          <TheForm user="admin"/>,
+          $('#example_form')[0]
+       );
+     })();
+
+     /**
+      *
+      * Exapmle 5:
+      *
+      * 事件冒泡
+      */
+     class EventBubbling extends React.Component
+     {
+       /**
+        * [constructor description]
+        * @method constructor
+        * @param  {[type]}    ags [description]
+        * @return {[type]}        [description]
+        */
+       constructor(...ags){
+         super(...ags);
+       }
+       /**
+        * [handerParent description]
+        * @method handerParent
+        * @return {[type]}     [description]
+        */
+       handerParent(event){
+          alert('我是父级');
+          event.preventDefault();
+          event.nativeEvent.stopImmediatePropagation();
+          event.nativeEvent.stopPropagation();
+       }
+       /**
+        * [handerChildren description]
+        * @method handerChildren
+        * @return {[type]}       [description]
+        */
+       handerChildren(event){
+         alert('我是子级')
+         event.preventDefault();
+         event.nativeEvent.stopImmediatePropagation();
+         event.nativeEvent.stopPropagation();
+       }
+       /**
+        * [render description]
+        * @method render
+        * @return {[type]} [description]
+        */
+       render(){
+         return (
+           <div className="parent" style={{marginTop:100}} data-name='父级' onClick={this.handerParent.bind(this)}>
+            <h1>事件冒泡测试</h1>
+              <div className="children" data-name='子级' onClick={this.handerChildren.bind(this)}></div>
+           </div>
+         );
+       }
+     }
+
+     $(function(){
+       ReactDOM.render(
+         <EventBubbling />,
+         $('example_event_bubbling')[0])
+     })
+
+     /**
+      * Exapmle 6:
+      *
+      * 延迟加载
+      */
+      class LoadDlls extends React.Component{
+        /**
+         * [constructor description]
+         * @method constructor
+         * @param  {[type]}    ags [description]
+         * @return {[type]}        [description]
+         */
+        constructor(...ags){
+            super(...ags);
+            this.imagePath = this.props.images.split(',');
+            var _this = this;
+            $(window).scroll(function (){
+                var scrollTop  = document.documentElement.scrollTop || document.body.scrollTop,
+                  scrollBottom = scrollTop+document.documentElement.clientHeight,
+                    images     =  _this.refs['loadContainer'].children;
+              　　for (var i=0; i<images.length; i++){
+              　　　　if (_this.getFixed(images[i])[1]<=scrollBottom){//此时说明这图片已经在可视区域内，应该开始加载了
+                        images[i].src = $(images[i]).attr("data-src");
+              　　　　}
+              　　}
+            })
+          }
+
+          /**
+           * [getFixed description]
+           * @method getFixed
+           * @param  {[type]} obj [description]
+           * @return {[type]}     [description]
+           */
+          getFixed(obj){
+          　　//获取非行间属性
+          　　function getStyle(obj,styleName){
+          　　　　if (obj.currentStyle){
+          　　　　　　return obj.currentStyle[styleName];
+          　　　　}else{
+          　　　　　　return getComputedStyle(obj,null)[styleName];
+          　　　　}
+          　　}
+          　　//要获取图片相对网页顶部的距离，但图片有被定位的父级
+          　　var iLeft  = 0,
+                   iTop = 0,
+                 oParent =obj;
+
+          　　while(oParent){
+          　　　　if (oParent.tagName=="HTML"){
+          　　　　　　break;
+          　　　　}
+          　　　　iLeft+=oParent.offsetLeft;
+          　　　　iTop+=oParent.offsetTop;
+          　　　　if (oParent!=obj){
+          　　　　　　iLeft+=parseInt(getStyle(oParent,"borderWidth"));//offsetLeft不包括边框，因此要把边框加上
+          　　　　　　iTop+=parseInt(getStyle(oParent,"borderWidth"));
+          　　　　}
+          　　　　oParent=oParent.offsetParent;
+          　　}
+          　　return [iLeft,iTop];//当 break 后itop就是图片相对网页顶部的距离
+          }
+
+        /**
+         * [render description]
+         * @method render
+         * @return {[type]} [description]
+         */
+        render(){
+          var result = [];
+          for(var i =0;i< this.imagePath.length; i++){
+            // 自定义属性需放入data
+              result.push(<img key={i} data-src={this.imagePath[i]} alt="延迟加载|懒加载|异步加载"/>)
+          }
+          return (
+            <div ref="loadContainer" style={{height:300,whidth:300,paddingTop:10}}>
+              <h1>下拉滚动条开始延迟加载表演</h1>
+              {result}
+            </div>
+          );
+        }
+      }
+      /**
+       * Jquery 方式立即调用函数
+       */
+      $(function(){
+        ReactDOM.render(
+           <LoadDlls images='./resources/3. React 组件的生命周期.jpeg,./resources/3. React 组件的生命周期.jpeg,./resources/3. React 组件的生命周期.jpeg,./resources/3. React 组件的生命周期.jpeg,./resources/3. React 组件的生命周期.jpeg,./resources/3. React 组件的生命周期.jpeg'/>,
+           $('.example_load_dlls')[0]
+        );
+      });
+    </script>
+</html>

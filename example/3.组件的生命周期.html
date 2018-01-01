@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>React Exmpale</title>
+    <!-- React 核心库     -->
+    <script src="./bower_components/local_react/react.js"></script>
+    <!-- 提供dom操作 -->
+    <script src="./bower_components/local_react/react-dom.js"></script>
+    <!-- 将jsx语法转为javascript -->
+    <script src="./bower_components/local_react/browser.js"></script>
+    <style media="screen">
+      .box{width: 300px;height: 300px;background: #CCC}
+    </style>
+  </head>
+  <body>
+      <!-- react 渲染的模版内容会插入到这个dom节点中，作为一个容器 -->
+      <div id="example_container"></div>
+      <div id="exapmle_show"></div>
+      <div id="exapmle_clock"></div>
+      <div id="exapmle_display_list"></div>
+  </body>
+    <!-- 在React中使用jsx跟JavaScript不兼容，在使用jsx的地方要设置type=babel -->
+    <!-- babel是一个转换编译器，ESC6转换成可以在浏览器中运行的代码 -->
+    <script type="text/babel">
+       // 此处属于react的编码区
+       /**
+        * 组件的生命周期
+        *  -> 组件从它的产生到销毁 中间是有很多过程的
+        *
+        * componentWillMount()     // 即将挂载。临创建之前
+        * componentDidMount()      // 已经挂载。创建之后
+        *
+        * componentWillUpdate()   // 更新之前
+        * componentDidUpdate()    // 更新之后
+        *
+        * componentWillUnmount()  // 卸载之前
+        * 没有 componentDidUnmount
+        *
+        * componentWillReceiveProps() // 组件参数更新
+        *
+        * 组件常用须知
+        * 1. React中的组件需要以大写字母开头，驼峰命名法
+        * 2. React 中可以使用React.createClass方法创建一个类
+        *         如  var ShowHide = React.createClass({render :function(){
+        *             return <h1>Hello React Component</h1>
+        *         }})
+        *
+        * 3. 核心代码：每个组件必须实现自己的render方法，返回值 null bool 组件模版
+        *
+        * 组件的 props
+        * 1. 组件自身的属性对象 。一般用于嵌套的内外层组件中，负责传递信息
+        * 2. 它通常是由父层组件往 子层组件传递
+        * 3. props 对象重的属性值与组件中的属性是一一对应的
+        * 4. 不要直接修改props中属性的值
+        * 5. ...this.props 可以将父组件所有内容赋给子组件
+        * 6. this.props.children 是一个例外，不是跟组件的属性对应的
+        *
+        *
+        * @注意
+        * 1. JSX 是一个语法 ，虽然是类HTML的书写，但最终是会被转换为JS运行。
+        * 2. 在React 和HTML5 设置样式时书写格式是有区别的
+        *   a. HTML 以; 结尾 React 以,结尾
+        *   b. HTML key value 都不加引号。React 中key不能出现'-',需要使用驼峰。value为字符串 需要引号
+        *   c. HTML中 如果value是int需要加单位，React 不需要
+          */
+
+       // Exapmle 1: 点击显示隐藏
+       /**
+        * 控制方块隐藏显示
+        */
+       class ShowHide extends React.Component{
+         /**
+          * [construct 初始化]
+          * @method construct
+          * @param  {[type]}  ags [description]
+          * @return {[type]}      [description]
+          */
+          constructor(...ags){
+            super(...ags);
+            this.state = {display : 'block',text :'点击隐藏'}
+          }
+
+          responseShow(event){
+              this.setState({
+                display:this.state.display == 'block' ? 'none' : 'block',
+                text:this.state.text       == '点击隐藏' ? '点击显示' : '点击隐藏'
+              })
+          }
+
+          /**
+           * [render 模版渲染]
+           * @method render
+           * @return {[type]} [description]
+           */
+         render(){
+           return <div>
+              <input type="button" value={this.state.text} onClick={this.responseShow.bind(this)}/>
+              <div className="box" style={{display:this.state.display,borderColor:'black'}}></div>
+              </div>;
+         }
+       }
+       window.onload= function(){
+         ReactDOM.render(<ShowHide/>,document.getElementById('exapmle_show'));
+       }
+
+       // Exapmle 2: 时钟
+       /**
+        * 一个时钟小玩意儿
+        */
+        class Clock extends React.Component{
+          /**
+           * [constructor 构造初始化]
+           * @method constructor
+           * @param  {[type]}    ags [description]
+           * @return {[type]}        [description]
+           */
+          constructor(...ags){
+              super(...ags);
+              this.state = {hour:0,minute:0,second:0};
+              var _this  = this;
+              setInterval(function(){
+                _this.responseClock();
+              },1000)
+          }
+          /**
+           * [componentDidmount 创建之后]
+           * @method componentDidmont
+           * @return {[type]}         [description]
+           */
+          componentDidMount(){
+            this.responseClock()
+          }
+
+          /**
+           * [componentDidUpdate 更新之后]
+           * @method componentDidUpdate
+           * @return {[type]}           [description]
+           */
+          componentDidUpdate(){
+            console.log('更新之后')
+          }
+
+          /**
+           * [responseClock 响应时钟关系]
+           * @method responseClock
+           * @param  {[type]}      event [description]
+           * @return {[type]}            [description]
+           */
+          responseClock(event){
+              var dateObj = new Date();
+              this.setState({
+                hour   : dateObj.getHours(),
+                minute : dateObj.getMinutes(),
+                second : dateObj.getSeconds(),
+              })
+          }
+          /**
+           * [render 渲染时钟视图]
+           * @method render
+           * @return {[type]} [description]
+           */
+          render(){
+              return <div>
+              <span>{this.state.hour}</span> ：
+              <span>{this.state.minute}</span> ：
+              <span>{this.state.second}</span>
+            </div>;
+          }
+        }
+        ReactDOM.render(<Clock/>,document.getElementById('exapmle_clock'));
+
+        // Exapmle 3: 输出列表
+        /**
+         * 输出列表
+         */
+        /**
+         * [Item 子类]
+         * @extends React
+         */
+        class Item extends React.Component{
+          /**
+           * [constructor constructor]
+           * @method constructor
+           * @param  {[type]}    Arguments [description]
+           * @return {[type]}        [description]
+           */
+          constructor(Arguments){
+              super(Arguments);
+          }
+          /**
+           * [render 视图渲染]
+           * @method render
+           * @return {[type]} [description]
+           */
+          render(){
+            return <li>{this.props.vaule}</li>;
+          }
+        }
+        /**
+         * [List 父类]
+         * @extends React
+         */
+        class List extends React.Component{
+          /**
+           * [constructor constructor]
+           * @method constructor
+           * @param  {[type]}    Arguments [description]
+           * @return {[type]}             [description]
+           */
+          constructor(Arguments){
+              super(Arguments);
+          }
+          /**
+           * [render 视图渲染]
+           * @method render
+           * @return {[type]} [description]
+           */
+          render(){
+            var arr    = [12,21,31423,4435],
+                result = [];
+            for(var i = 0; i < arr.length; i++){
+                result.push(<Item key={i} vaule={arr[i]}/>);
+            }
+            return <ul>
+                      {result}
+                  </ul>;
+          }
+        }
+         ReactDOM.render(<List/>,document.getElementById('exapmle_display_list'));
+    </script>
+</html>

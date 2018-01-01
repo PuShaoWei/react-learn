@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>React Exmpale</title>
+    <!-- React 核心库     -->
+    <script src="./bower_components/local_react/react.js"></script>
+    <!-- 提供dom操作 -->
+    <script src="./bower_components/local_react/react-dom.js"></script>
+    <!-- 将jsx语法转为javascript -->
+    <script src="./bower_components/local_react/browser.js"></script>
+  </head>
+  <body>
+      <!-- react 渲染的模版内容会插入到这个dom节点中，作为一个容器 -->
+      <div id="example_container"></div>
+      <div id="example_render_hello"></div>
+      <div id="example_render_echo"></div>
+      <div id="example_render_component"></div>
+      <div id="example_render_event"></div>
+  </body>
+    <!-- 在React中使用jsx跟JavaScript不兼容，在使用jsx的地方要设置type=babel -->
+    <!-- babel是一个转换编译器，ESC6转换成可以在浏览器中运行的代码 -->
+    <script type="text/babel">
+       /* ============== 此处属于react的编码区 ============== */
+
+      /**
+       *  JSX
+       *  1. 不是一门新的语言 ，是个语法
+       *  2. jsx必须借助react 环境运行
+       *  3. jsx标签其实就是html标签。只不过我们在JavaScript中书写这些标签的时候不用“”扩起来，可以向XML一样书写
+       *
+       *  Babel
+       *  1. 专门来编译JSX的
+       *  2. 有且只能拥有一个顶级元素
+       *  3. 模版字符串使用{}扩起来
+       */
+
+       // Exapmle 1: 渲染 Hello React
+       /**
+        * ReactDOM.render(html形式内容,模版需要插入的DOM节点，渲染后回掉)
+        *
+        * 将模版转换为html语言，渲染DOM,并插入到指定的DOM节点中
+        */
+       ReactDOM.render(
+         <h1>Hello React，  You are the best！</h1>,
+         document.getElementById('example_render_hello')
+       );
+
+        // Exapmle 2: 在JSX中运行JavaScript代码
+        /**
+         * ReactDOM.render(html形式内容,模版需要插入的DOM节点，渲染后回掉)
+         *
+         * 使用{}扩起来 {}表达式
+         */
+        var render_echo = "Hello World!";
+        ReactDOM.render(
+          <h1>{render_echo}</h1>,
+          document.getElementById('example_render_echo')
+        )
+
+        // Exapmle 3: ES6 及React 渲染组件
+        /**
+         *
+         * 1。 constructor 构造函数
+         * 2. 定义组件： class *** extends React.Component{ render(){<html>}}
+         * 3. 使用组件：就跟标签一样用   ReactDOM.render(< *** />,document.getElementById('ontainer')）;
+         * 4. 组件是可以有属性的 ,React 里所有的属性都在 props下
+         * 5. 可 var p = new Person(); 调用
+         * 6. 注意 return 第一行必须要有内容
+         * 7. super(props); 或者 super(...args) 或 Arguments 来让父类构造函数执行
+         */
+        class Person extends React.Component
+        {
+          /**
+           * [constructor 构造实例]
+           * @method constructor
+           * @return {[type]}    [description]
+           */
+          constructor(props) {
+            super(props);
+            console.log('constructor person');
+          }
+          /**
+           * [render 渲染组件]
+           * @method render
+           * @return {[type]} [description]
+           */
+          render(){
+             return <h1>{this.props.verb} {this.props.noun}</h1>;
+          }
+        }
+        ReactDOM.render(
+          <Person verb="Hello" noun='React component'/>,
+          document.getElementById('example_render_component')
+        )
+
+        // Exapmle 4: React 事件渲染 【状态】
+        /**
+         *
+         * 1. 状态是活的，在constructor 里面可以this.state = {};在其他方法里只能用this.setState={};
+         * 2. React 里的 onChange 与平常HTML的不一样，它是需要编译的，事件大小写不能乱
+         * 3. 绑定事件必须要有this.function.bind(this)
+         */
+        class EventAction extends React.Component
+        {
+
+          /**
+           * [constructor 构造函数]
+           * @method constructor
+           * @return {[type]}    [description]
+           */
+          constructor(...args){
+              super(...args);
+              this.state = {value :'<- 测试一下change事件'};
+          }
+
+          /**
+           * [outPutToSpan 输出至span]
+           * @method outPutToSpan
+           * @return {Function} [description]
+           */
+          outPutToSpan(event){
+              this.setState({
+                value : event.target.value
+              })
+          }
+
+          /**
+           * [render description]
+           * @method render
+           * @return {[type]} [description]
+           */
+          render(){
+              return <div>
+                  <input type="text" onChange={this.outPutToSpan.bind(this)}/>
+                  <span>{this.state.value}</span>
+              </div>
+          }
+        }
+        ReactDOM.render(
+          <EventAction />,
+          document.getElementById('example_render_event')
+        )
+    </script>
+</html>
